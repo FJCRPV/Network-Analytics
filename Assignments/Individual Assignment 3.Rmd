@@ -1,0 +1,396 @@
+
+# INSTRUCTIONS
+
+-   This is an individual assignment.
+-   Submit your answer digitally as two files through Moodle:
+    -   An R markdown file (extension **Rmd**). Use the template provided
+        to you and provide your answers (both code and text) below each
+        question.
+    -   An **HTML** file &ldquo;knitted&rdquo; by RStudio including all the results and
+        plots. More details on how to create these files were provided
+        in class on week 3.
+-   Follow the Style Guide (available on Moodle). You can be
+    penalized on up to 20% in each question for which you do not follow
+    the Style Guide.
+-   Questions regarding the assignment should be posted <span class="underline">exclusively</span> on
+    the respective discussion forum on Moodle.
+
+
+## <span class="underline">Deadline:</span> Monday, March 7 at 23:59.
+
+-   Late submissions are <span class="underline">not allowed</span>
+
+<span class="underline">**Warning:**</span> The detection of <span class="underline">any form of plagiarism</span> in your work
+means the assignment will be graded with <span class="underline">ZERO points</span>.
+
+\newpage
+
+
+# Dating Platforms
+
+Online dating platforms enable people to find new connections with the
+goal of developing personal, romantic, or sexual relationships. In
+some platforms individuals express their interest in others in
+multiple ways, including by &ldquo;liking&rdquo; them. &ldquo;Liking&rdquo; someone is an
+indication of interest that, in most platforms, is revealed to both
+individuals only if the &ldquo;liking&rdquo; is mutual, i.e., if the target
+individual also stated interest. In such cases we say there is a
+match.
+
+For this assignment we are going to analyze &ldquo;likes&rdquo; issued by members
+in an online dating platform using tools learned in class. Answer each
+of the questions below the best you can. In case you find any
+ambiguity in the question, assume the most sensible option in you
+opinion, state your assumptions and proceed. In most cases ambiguity
+is by design.
+
+
+## Data Description
+
+The file `nda-dating-likes.RData` contains two `data.table`, each of
+them is described below.
+
+
+### `dt.users`
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Field</th>
+<th scope="col" class="org-left">Type</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td class="org-left"><code>user_id</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">user identification</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>inviter_id</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">id of the user that invited this user to the platform</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>gender</code></td>
+<td class="org-left">string</td>
+<td class="org-left">gender</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>birth_year</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">year of birth</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>education</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">education</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>approved_week</code></td>
+<td class="org-left">date</td>
+<td class="org-left">week in which this user was approved to the platform</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>height</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">height (in cm)</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>children</code></td>
+<td class="org-left">boolean</td>
+<td class="org-left">whether the user has children</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>smoker</code></td>
+<td class="org-left">boolean</td>
+<td class="org-left">whether the user smokes</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>n_fb_friends</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">how many Facebook friends does the user have</td>
+</tr>
+</tbody>
+</table>
+
+
+### `dt.likes`
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Field</th>
+<th scope="col" class="org-left">Type</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td class="org-left"><code>sender_user_id</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">user identification of the sender of the like</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>receiver_user_id</code></td>
+<td class="org-left">integer</td>
+<td class="org-left">user identification of the receiver of the like</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>week</code></td>
+<td class="org-left">date</td>
+<td class="org-left">week in which the like was issued</td>
+</tr>
+</tbody>
+</table>
+
+\newpage 
+
+
+## Setup and data loading
+
+Start by loading the required libraries and loading the likes data
+
+```{r}
+library(data.table)
+library(ggplot2)
+library(igraph)
+
+load("nda-dating-likes.RData") 
+```
+
+
+## Questions
+
+
+### Invites Network `[10 points]`
+
+This section contains questions related to the invites network.
+
+1.  *(Easy)* Build a directed graph representing the invites network: an
+    individual A is connected to individual B if A invited B to the
+    platform. What is the size of the longest chain? What is the
+    clustering coefficient of this network? Justify. `[3 points]`
+
+    ```{r}
+    all.users <- dt.users[, list(inviter_id, user_id)]
+    all.users.clean <- all.users[!(inviter_id == "NA")]
+    g.invites <- graph.data.frame(all.users.clean, directed = TRUE)
+    
+    diameter <- diameter(g.invites)
+    
+    #the following is just a visualization of the longest chain
+    diameter.path =  get_diameter(g.invites, directed=TRUE)
+    diameter.graph = induced_subgraph(g.invites, diameter.path)
+    plot(diameter.graph)
+    
+    clustering.invites <- transitivity(g.invites)
+    
+    cat("The longest chain in the invites network has size", diameter, ".\nThe clustering coefficient of this network is", clustering.invites, ". This is as expected as the clustering coefficient is simply the ratio of the triangles and the connected triples in the graph. As in this data it appears that only one individual gets credit for inviting another user, there can never be two arrows coming into a single vertex. Thus, there will never appear any triangle, therefore the above-mentioned ratio will have numerator zero and will always be zero.")
+    ```
+
+2.  *(Easy, once you get what you need to do)* Goel, Watts and Goldstein,
+    in their paper entitled &ldquo;The structure of online diffusion
+    networks&rdquo;, state that long cascades in diffusion networks happen
+    very rarely in online networks. Do you think is also the case with
+    the invites network in this online dating platform? Perform the
+    analyses you deem necessary to answer this question with reasonable
+    confidence. `[3 points]`
+
+    ```{r}
+    cluster.sizes <- components(g.invites)$csize #The components function gives us the maximal strongly connected components of a graph. By taking the czise, we are receiving a numeric vector giving the sizes of the clusters
+    ggplot() + geom_histogram(aes(x=cluster.sizes))
+    cat("By taking a look at the histogram plot of the sizes of the clusters existant in our invites network, we can see that most clusters have sizes of less than 25 users, with most actually being close to the 0-sized clusters. Thus, the statement made by Goel, Watts and Goldstein, saying that long cascades in difusion networks happen very rarely in online networks seems to resemble with our invites data - most clusters have very small sizes and there seems to be no large cascading effect.")
+    ```
+
+3.  *(Moderate)* Do you think the invites network exhibits homophily?
+    In other words, do you think men are more likely to invite other
+    men and women more likely to invite other women? What about in
+    terms of age? Do members tend to invite members of a similar age?
+    Please describe your overall approach to answering these questions
+    and justify and explain each step of your answer. `[4 points]`
+
+    ```{r}
+    #gender homophily
+    dt.inviter.gender <- dt.users[, inviter_gender := dt.users[inviter_id, "gender"]] #creating a new column to our dataset that includes the gender of the inviter
+    dt.inviter.gender.clean <- dt.inviter.gender[!(inviter_id == "NA")] #cleaning the data, removing rows where there was no invitation
+    g.inviter.gender <- graph.data.frame(dt.inviter.gender.clean[,c("gender","inviter_gender")], directed = TRUE) #creating a graph with the genders of both the users and their inviters
+    edges.gender <-  get.data.frame(g.inviter.gender) #getting the edges
+    gender.homophily <- length(which(edges.gender$from == edges.gender$to)) #finding out how many edges have the same gender on both sides
+    prop.gender.homophily <- gender.homophily/nrow(edges.gender) #making a proportion out of the found number of edges
+    
+    #age homophily (the methodology is the same as above)
+    dt.inviter.birth <- dt.users[, inviter_birth_year := dt.users[inviter_id, "birth_year"]]
+    dt.inviter.birth.clean <- dt.inviter.birth[!(inviter_id == "NA")]
+    g.inviter.birth <- graph.data.frame(dt.inviter.birth.clean[,c("birth_year","inviter_birth_year")], directed = TRUE)
+    edges.age <-  get.data.frame(g.inviter.birth)
+    age.homophily <- length(which(edges.age$from == edges.age$to))
+    prop.age.homophily <- age.homophily/nrow(edges.age)
+    
+    cat("Whether the invites network exhibits homophily deppends on the criteria we choose for this purpose. If we were to look at gender homophily, that is, how likely are users to invite users of the same gender, we would find a homophily of", prop.gender.homophily*100, "%.\nIf, on the other hand, we were to look at age homophily, assumed to be how likely it is for members to invite users born in the same year, we would find a homophily of", prop.age.homophily*100,"%.\nThe approach I took to answer these questions was rather simple. With homophily being the likelyhood of invitations of users with similar characteristics, be it gender or age, my approach was to find out the characteristics from both users, the invited and the inviter, and see how many were equal to each other. Finally, I took a proportion on the number of invites to get a likelyhood percentage.")
+    ```
+
+4.  *(Make up question: You can skip any of the previous questions and
+    answer this question instead.)* Describe and perform any additional
+    analysis you want **using the invites network**. You will be graded
+    by the creativity and correctness of the analysis, but also as a
+    comparison to the best answers provided by other students. The best
+    answers will have full points, while the other answers will be
+    judged by comparison with the best answers. `[3 points]`
+
+    ```{r}
+    cat("Thank you for giving us this opportunity. However, I choose not answer this question.")
+    ```
+    
+### Likes Network `[10 points]`
+
+This section contains questions related to the likes network.
+
+1.  *(Easy)* Build a directed graph representing the likes network: an
+    individual A is connected to individual B if A liked B. What is the
+    clustering coefficient of this network? Justify. `[2.5 points]`
+
+    ```{r}
+    all.likes <- dt.likes[, list(sender_user_id, receiver_user_id)]
+    g.likes <- graph.data.frame(all.likes, directed = TRUE)
+    
+    clustering.likes <- transitivity(g.likes)
+    
+    cat("The clustering coefficient for the likes network is", clustering.likes,". As the clustering coefficient shows the ratio of which each nodes' neighbors are linked among themselves, that is, a triangle of users all liking each other, a rather low clustering coefficient of", clustering.likes, "means that not many like chains, that is, A liking B, B liking C and C liking A, are being created.")
+    ```
+
+2.  *(Moderate)* How many individuals &ldquo;like&rdquo; individuals of the same
+    gender? Does this happen more between women or between men? `[2.5
+       points]`
+
+    ```{r}
+    dt.user.gender <- dt.users[,c("user_id","gender")] #creating a data table with only the user_id and their gender
+    dt.likes.sender.gender <- merge(dt.likes, dt.user.gender, by.x = "sender_user_id", by.y = "user_id") #merging the likes data table with the users data table, by the sender_user_id variable, so we have their genders
+    dt.likes.gender <- merge(dt.likes.sender.gender, dt.user.gender, by.x = "receiver_user_id", by.y = "user_id") #doing the same but to get the gender of the receiver users
+    colnames(dt.likes.gender)[4] <- "sender_gender"
+    colnames(dt.likes.gender)[5] <- "receiver_gender"
+    dt.female.mutual.likes <- dt.likes.gender[dt.likes.gender$receiver_gender == "Female" & dt.likes.gender$sender_gender == "Female"]
+    dt.male.mutual.likes <- dt.likes.gender[dt.likes.gender$receiver_gender == "Male" & dt.likes.gender$sender_gender == "Male"]
+    
+    cat("The number of mutual likes among females is", nrow(dt.female.mutual.likes))
+    cat("The number of mutual likes among males is", nrow(dt.male.mutual.likes))
+    cat("As can be seen, more men like each other than women. In fact,", nrow(dt.male.mutual.likes) - nrow(dt.female.mutual.likes), "more men like each other than women do." )
+    ```
+
+3.  *(Easy)* Build an undirected graph representing the matches
+    network: an individual A is connected to individual B if A liked B
+    and B liked A. What is the clustering coefficient of this network?
+    Justify. Hint: the function `as.undirected` transforms a directed
+    graph into an undirected graph; it can transform only the mutually
+    directed edges in undirected edges. `[2.5 points]`
+
+    ```{r}
+    g.mutual.likes <- as.undirected(g.likes, mode="mutual")
+    clustering.matches <- transitivity(g.mutual.likes)
+    
+    cat("The clustering coefficient of the matches network is", clustering.matches, ". Again, such a low clustering coefficient tells us that there aren't many love triangles being formed. It is not very common that three users all match between eachother in this network.")
+    ```
+
+4.  *(Moderate)* A recent research article gathered significant
+    attention for claiming that, contrary to decades of prior research,
+    most real life networks are not scale-free (i.e., the degree
+    distribution does no not follow a power law). Based on the Quanta
+    Magazine article (not on the original research paper) linked below,
+    how do you classify the network of matches? Does it resemble a
+    random network, a free-scale network, or a mixed network? Justify
+    your answer. `[2.5 points]`
+    
+    Article: <http://bit.ly/2BwobR1>
+
+    ```{r}
+    #random network
+    set.seed(5165)
+    #Random directed graph with 1000 nodes and 30% chance of a tie
+    gg <-random.graph.game(1000,0.3,directed=F)
+    gg.degree.distribution <- degree_distribution(gg, cumulative = FALSE)
+    plot(gg.degree.distribution,
+         main = 'Random Network Degree Distribution')
+    
+    
+    #Log-normal distribution (which has a heavier tail than an exponential distribution, but a lighter tail than a power law)
+    #Scale-free network
+    curve(dlnorm(x), from=0, to=10,
+          main = 'Scale-Free Network',
+          ylab = 'Density',
+          lwd = 2)
+    
+    
+    #Exponential distribution (which has a relatively thin tail)
+    #In-between Network
+    x_dexp <- seq(1, 10, by = 0.1) # Specify x-values
+    y_dexp <- dexp(x_dexp, rate = 5) # Apply dexp() function   
+    plot(y_dexp,
+         main = 'In-Between Network',
+         ylab = 'Density') # Plot dexp values 
+    
+    
+    #matches network
+    g.degree.distribution <- degree_distribution(g.mutual.likes, cumulative = FALSE)
+    plot(g.degree.distribution,
+         main = 'Matches Network',
+         ylab = 'Degree Distribution',
+         ylim=c(0,0.06))
+    
+    cat("As mentioned in the article, I decided to compare our matches network to three different networks - a Random Network, a Scale-Free (power-law) Network, and an In-Between Network. In the Random Network, the degree distribution is shaped rouhgly like a bell curve that peaks at the network's 'characteristic scale'. The Scale-Free (Power Law) Network shows us that the degrees follow a power law that has a 'heavy tail', without showing a characteristic scale, making it scale-free. The network created to simulate a scale-free network was a log-normal distribution, which has a slightly heavy tail, however lighter than a true power-law distribution. Finally, the In-Between, or Mixed, Network was created. For this purpose, I simulated an exponential distribution, which has a relatively thin tail, thinner than the scale-free network distribution. It can be seen from the plot that the tail is very weak.\nComparing the degree distribution of our Matches Network with the three presented networks, it is suggested that our Matches Network follows a Mixed Network, as we can see its shape being the same as our In-Between Network, while presenting, in fact, a rather weak tail.")
+    ```
+
+5.  *(Make-up question: You can skip any of the previous questions
+    and answer this question instead.)* Describe and perform any
+    additional analysis you want **using the any network originated from
+    the likes data.** You will be graded by the creativity and
+    correctness of the analysis, but also as a comparison to the best
+    answers provided by other students. The best answers will have full
+    points, while the other answers will be judged by comparison with
+    the best answers. `[2.5 points]`
+
+    ```{r}
+    cat("Thank you for giving us this opportunity. However, I choose not answer this question.")
+    ```
