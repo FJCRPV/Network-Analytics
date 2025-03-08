@@ -17,7 +17,7 @@ We separated the information through two different tabs:
 1. General - Performs descriptive statistics, network exploration and network analysis on the overall data
 2. Author - Performs both descriptive statistics and network exploration on a selected author
 
-The user can interact with most graphs for a clearer and more concise visualization.
+The user can interact with most graphs for a clearer and more concise visualization. The app can be found [here](https://rfilho50530.shinyapps.io/BookAnalysisProject/).
 
 This project was developed by:
 - Francisco Perestrello - 39001
